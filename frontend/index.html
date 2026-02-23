@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APT Detection Radar - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1a 100%); }
+        .glow { box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
+        .card-hover:hover { border-color: #8b5cf6; transform: translateY(-5px); }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col items-center justify-center p-6">
+
+    <header class="text-center mb-10">
+        <h1 class="text-4xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-lavender-300 mb-2">
+            APT DETECTION RADAR
+        </h1>
+        <p class="text-slate-400 uppercase tracking-widest text-xs">Command Center: <span class="text-green-400">Ready</span></p>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+        <a href="/url-page" class="bg-[#16213e]/50 border border-purple-500/20 p-8 rounded-2xl glow backdrop-blur-md text-center transition-all card-hover">
+            <div class="text-4xl mb-4">🔗</div>
+            <h2 class="text-xl font-bold text-purple-300 mb-2">Scan Link</h2>
+            <p class="text-sm text-slate-400">Analyze suspicious URLs and web addresses for malicious intent.</p>
+        </a>
+
+        <a href="/file-page" class="bg-[#16213e]/50 border border-purple-500/20 p-8 rounded-2xl glow backdrop-blur-md text-center transition-all card-hover">
+            <div class="text-4xl mb-4">📁</div>
+            <h2 class="text-xl font-bold text-purple-300 mb-2">Analyze File</h2>
+            <p class="text-sm text-slate-400">Check file hashes against global threat databases for APT signatures.</p>
+        </a>
+    </div>
+</body>
+</html>

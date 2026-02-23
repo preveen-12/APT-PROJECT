@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Scanner - APT Radar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1a 100%); }
+        .glow { box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col items-center justify-center p-6">
+    <div class="w-full max-w-xl mb-4 text-left">
+        <a href="/" class="text-purple-400 hover:text-lavender-300 text-sm font-medium transition-all flex items-center gap-2">
+            <span>←</span> Back to Command Center
+        </a>
+    </div>
+
+    <div class="bg-[#16213e]/50 border border-purple-500/30 p-8 rounded-2xl glow w-full max-w-xl backdrop-blur-md text-center">
+        <h2 class="text-2xl font-bold text-purple-300 mb-6 uppercase tracking-tight">URL Analysis Engine</h2>
+        <input type="text" id="urlField" placeholder="Paste suspicious URL here..." 
+            class="w-full bg-[#0f0f1a] border border-purple-900/50 p-4 rounded-lg mb-4 focus:outline-none focus:border-purple-500 text-purple-300">
+        <button onclick="scanUrl()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg shadow-lg transition-all">
+            SCAN LINK
+        </button>
+    </div>
+
+    <script>
+        async function scanUrl() {
+            const urlInput = document.getElementById('urlField').value;
+            if (!urlInput) return alert("Enter a URL!");
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/scan-url?url=${encodeURIComponent(urlInput)}`);
+                const data = await response.json();
+                if (data.data) {
+                    const stats = data.data.attributes.last_analysis_stats;
+                    alert(`RADAR REPORT:\nMalicious: ${stats.malicious}\nHarmless: ${stats.harmless}`);
+                } else { alert(data.message); }
+            } catch (err) { alert("Backend Offline!"); }
+        }
+    </script>
+</body>
+</html>

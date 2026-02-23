@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Analyzer - APT Radar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1a 100%); }
+        .glow { box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col items-center justify-center p-6">
+    <div class="w-full max-w-xl mb-4 text-left">
+        <a href="/" class="text-purple-400 hover:text-lavender-300 text-sm font-medium transition-all flex items-center gap-2">
+            <span>←</span> Back to Command Center
+        </a>
+    </div>
+
+    <div class="bg-[#16213e]/50 border border-purple-500/30 p-8 rounded-2xl glow w-full max-w-xl backdrop-blur-md text-center">
+        <h2 class="text-2xl font-bold text-purple-300 mb-6 uppercase tracking-tight">APT File Inspector</h2>
+        <div class="border-2 border-dashed border-purple-900/50 p-10 rounded-xl mb-4 hover:border-purple-500 transition-all cursor-pointer" onclick="document.getElementById('fileInput').click()">
+            <p class="text-slate-400">Click to Select File for Analysis</p>
+            <input type="file" id="fileInput" class="hidden" onchange="handleFileUpload(this)">
+        </div>
+        <p id="statusText" class="text-xs text-purple-400/50 italic">Ready for Hash Scan</p>
+    </div>
+
+    <script>
+        async function handleFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            document.getElementById('statusText').innerText = "Generating Hash...";
+            
+            const arrayBuffer = await file.arrayBuffer();
+            const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+            const hash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/scan-file?file_hash=${hash}`);
+                const data = await response.json();
+                document.getElementById('statusText').innerText = "Ready for Hash Scan";
+                if (data.data) {
+                    const stats = data.data.attributes.last_analysis_stats;
+                    alert(`FILE REPORT:\nMalicious Signals: ${stats.malicious}\nHarmless: ${stats.harmless}`);
+                } else { alert(data.message); }
+            } catch (err) { alert("Backend Offline!"); }
+        }
+    </script>
+</body>
+</html>
