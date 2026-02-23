@@ -31,13 +31,22 @@
             const urlInput = document.getElementById('urlField').value;
             if (!urlInput) return alert("Enter a URL!");
             try {
-                const response = await fetch(`http://127.0.0.1:8000/scan-url?url=${encodeURIComponent(urlInput)}`);
+                // FIXED: Using relative path '/scan-url' instead of local '127.0.0.1'
+                const response = await fetch(`/scan-url?url=${encodeURIComponent(urlInput)}`);
                 const data = await response.json();
+                
                 if (data.data) {
                     const stats = data.data.attributes.last_analysis_stats;
                     alert(`RADAR REPORT:\nMalicious: ${stats.malicious}\nHarmless: ${stats.harmless}`);
-                } else { alert(data.message); }
-            } catch (err) { alert("Backend Offline!"); }
+                } else if (data.message) {
+                    alert(data.message); 
+                } else {
+                    alert("Analysis data not available yet. Please try again in 30 seconds.");
+                }
+            } catch (err) { 
+                console.error(err);
+                alert("Connection Error: Backend might still be starting up on Render."); 
+            }
         }
     </script>
 </body>
