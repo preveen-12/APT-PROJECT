@@ -20,15 +20,17 @@ VT_API_KEY = os.getenv("VT_API_KEY")
 VT_BASE_URL = "https://www.virustotal.com/api/v3"
 
 # --- HELPER TO FIND FRONTEND FILES ---
-# On Vercel, the directory structure can shift, so we use absolute paths
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# Moves up from 'api' folder to find 'frontend'
-FRONTEND_DIR = os.path.join(BASE_DIR, "..", "frontend")
+# os.getcwd() gets the root directory of the project on Vercel
+BASE_DIR = os.getcwd()
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 
 # --- PAGE ROUTING ---
 @app.get("/")
 async def serve_home():
-    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+    path = os.path.join(FRONTEND_DIR, "index.html")
+    if os.path.exists(path):
+        return FileResponse(path)
+    return {"error": f"File not found at {path}. Check your folder structure."}
 
 @app.get("/url-page")
 async def serve_url_page():
@@ -64,6 +66,3 @@ def scan_file(file_hash: str):
     headers = {"x-apikey": VT_API_KEY}
     response = requests.get(f"{VT_BASE_URL}/files/{file_hash}", headers=headers)
     return response.json() if response.status_code == 200 else {"message": "Hash not found."}
-
-# IMPORTANT: Remove the uvicorn.run block for Vercel deployment. 
-# Vercel handles the execution automatically via the 'app' object.
