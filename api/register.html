@@ -21,20 +21,29 @@
 async function doRegister() {
     const username = document.getElementById('user').value;
     const password = document.getElementById('pass').value;
-    if (!username || !password) return alert("Fields required");
 
-    const response = await fetch('/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-    });
+    if (!username || !password) {
+        alert("Please fill in both fields.");
+        return;
+    }
 
-    if (response.ok) {
-        alert("Registered!");
-        window.location.href = '/login-page';
-    } else {
-        const data = await response.json();
-        alert(data.detail || "Error");
+    try {
+        const response = await fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }) // Keys must match UserAuth model
+        });
+
+        if (response.ok) {
+            alert("Operator Registered! Redirecting to Login...");
+            window.location.href = '/login-page';
+        } else {
+            const errorData = await response.json();
+            alert("Registration Failed: " + (errorData.detail || "Unknown error"));
+        }
+    } catch (err) {
+        console.error("Fetch error:", err);
+        alert("Server is offline or unreachable.");
     }
 }
 </script>

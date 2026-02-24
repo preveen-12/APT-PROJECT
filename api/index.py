@@ -11,7 +11,10 @@ import base64
 import os
 import datetime
 
-DATABASE_URL = "sqlite:///./apt_radar.db"
+# Use an absolute path for the DB to avoid Render file-system confusion
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR, 'apt_radar.db')}"
+
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
