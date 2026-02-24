@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register - APT Radar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1a 100%); }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex items-center justify-center p-6">
+    <div class="bg-[#16213e]/80 p-8 rounded-2xl border border-purple-500/30 w-full max-w-md backdrop-blur-md">
+        <h2 class="text-2xl font-bold text-purple-300 mb-6 text-center uppercase tracking-widest">Register Operator</h2>
+        <input type="text" id="user" placeholder="Choose Username" class="w-full bg-[#0f0f1a] border border-purple-900/50 p-4 rounded-lg mb-4 text-purple-300 focus:outline-none focus:border-purple-500">
+        <input type="password" id="pass" placeholder="Set Password" class="w-full bg-[#0f0f1a] border border-purple-900/50 p-4 rounded-lg mb-6 text-purple-300 focus:outline-none focus:border-purple-500">
+        <button onclick="doRegister()" class="w-full bg-purple-600 hover:bg-purple-500 py-3 rounded-lg font-bold transition-all">INITIALIZE ACCOUNT</button>
+        <p class="text-center mt-4 text-xs text-slate-500">Already have access? <a href="/login-page" class="text-purple-400 hover:underline">Login</a></p>
+    </div>
+
+    <script>
+        async function doRegister() {
+            const username = document.getElementById('user').value;
+            const password = document.getElementById('pass').value;
+
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert("Operator Registered! Proceeding to Login.");
+                window.location.href = '/login-page';
+            } else {
+                alert(data.detail || "Registration Failed");
+            }
+        }
+    </script>
+</body>
+</html>
