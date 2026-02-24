@@ -5,6 +5,7 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime, Foreign
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from passlib.context import CryptContext
+from pydantic import BaseModel
 import requests
 import base64
 import os
@@ -27,11 +28,15 @@ class User(Base):
 class ScanLog(Base):
     __tablename__ = "scan_logs"
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id")) # Linked to user
+    user_id = Column(Integer, ForeignKey("users.id"))
     scan_type = Column(String)
     target = Column(String)
     result = Column(String)
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+
+class UserAuth(BaseModel):
+    username: str
+    password: str
 
 Base.metadata.create_all(bind=engine)
 
@@ -48,7 +53,6 @@ VT_API_KEY = os.getenv("VT_API_KEY")
 VT_BASE_URL = "https://www.virustotal.com/api/v3"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# --- DEPENDENCIES ---
 def get_db():
     db = SessionLocal()
     try:
@@ -56,21 +60,30 @@ def get_db():
     finally:
         db.close()
 
-# --- AUTH ROUTES ---
+# --- AUTH LOGIC ---
 @app.post("/register")
-def register(request: Request, db: Session = Depends(get_db)):
-    # This will handle the registration logic from the frontend
-    pass 
+async def register(auth: UserAuth, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.username == auth.username).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    
+    hashed_pass = pwd_context.hash(auth.password)
+    new_user = User(username=auth.username, hashed_password=hashed_pass)
+    db.add(new_user)
+    db.commit()
+    return {"message": "User created successfully"}
 
 @app.post("/login")
-def login(request: Request, db: Session = Depends(get_db)):
-    # This will handle user verification
-    pass
+async def login(auth: UserAuth, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.username == auth.username).first()
+    if not db_user or not pwd_context.verify(auth.password, db_user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+    
+    return {"message": "Login successful", "username": db_user.username}
 
 # --- PAGE ROUTING ---
 @app.get("/")
 async def serve_gateway():
-    # New first page: Asks to Login or Register
     return FileResponse(os.path.join(BASE_DIR, "gateway.html"))
 
 @app.get("/login-page")
@@ -83,7 +96,6 @@ async def serve_register():
 
 @app.get("/dashboard")
 async def serve_home():
-    # Only accessible after login
     return FileResponse(os.path.join(BASE_DIR, "home.html"))
 
 @app.get("/url-page")
@@ -94,10 +106,8 @@ async def serve_url_page():
 async def serve_file_page():
     return FileResponse(os.path.join(BASE_DIR, "file_analyzer.html"))
 
-# --- SCAN LOGIC (With User Tracking) ---
 @app.get("/history")
 def get_history(scan_type: str, db: Session = Depends(get_db)):
-    # We will filter this by user_id later today
     return db.query(ScanLog).filter(ScanLog.scan_type == scan_type).order_by(ScanLog.timestamp.desc()).limit(5).all()
 
 @app.get("/scan-url")
@@ -112,8 +122,6 @@ def scan_url(url: str, db: Session = Depends(get_db)):
         data = response.json()
         stats = data['data']['attributes']['last_analysis_stats']
         res_text = f"Malicious: {stats['malicious']}, Harmless: {stats['harmless']}"
-        
-        # Save log to DB
         new_log = ScanLog(scan_type="URL", target=url, result=res_text)
         db.add(new_log)
         db.commit()
@@ -130,7 +138,6 @@ def scan_file(file_hash: str, db: Session = Depends(get_db)):
         data = response.json()
         stats = data['data']['attributes']['last_analysis_stats']
         res_text = f"Malicious: {stats['malicious']}, Harmless: {stats['harmless']}"
-        
         new_log = ScanLog(scan_type="FILE", target=file_hash, result=res_text)
         db.add(new_log)
         db.commit()
