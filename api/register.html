@@ -28,22 +28,26 @@ async function doRegister() {
     }
 
     try {
-        const response = await fetch('/register', {
+        // Updated fetch to handle Render's potential path issues
+        const response = await fetch(`${window.location.origin}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }) // Keys must match UserAuth model
+            body: JSON.stringify({ username, password })
         });
+
+        const data = await response.json();
 
         if (response.ok) {
             alert("Operator Registered! Redirecting to Login...");
             window.location.href = '/login-page';
         } else {
-            const errorData = await response.json();
-            alert("Registration Failed: " + (errorData.detail || "Unknown error"));
+            // This shows the actual error from your Python backend (like "Username taken")
+            alert("Registration Failed: " + (data.detail || "Unknown error"));
         }
     } catch (err) {
         console.error("Fetch error:", err);
-        alert("Server is offline or unreachable.");
+        // This triggers if the server is sleeping or still crashing during startup
+        alert("System Link Failure: The Command Center is currently waking up or offline. Please wait 30 seconds and try again.");
     }
 }
 </script>
