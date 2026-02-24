@@ -3,3 +3,5 @@ uvicorn
 requests
 python-multipart
 sqlalchemy
+passlib[bcrypt]
+python-jwt
