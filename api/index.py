@@ -77,7 +77,7 @@ async def startup_event():
         admin = db.query(User).filter(User.username == "admin").first()
         if not admin:
             # Create a default admin account
-            hashed_pass = pwd_context.hash("admin123")
+            hashed_pass = pwd_context.hash("admin2")
             default_admin = User(username="admin", hashed_password=hashed_pass)
             db.add(default_admin)
             db.commit()
