@@ -76,12 +76,15 @@ async def startup_event():
         # Check if admin already exists
         admin = db.query(User).filter(User.username == "admin").first()
         if not admin:
-            # Create a default admin account
-            hashed_pass = pwd_context.hash("admin2")
-            default_admin = User(username="admin", hashed_password=hashed_pass)
-            db.add(default_admin)
-            db.commit()
-            print("Default Operator 'admin' initialized.")
+            try:
+                # SAFE BLOCK: If this fails, the server won't crash
+                hashed_pass = pwd_context.hash("admin2")
+                default_admin = User(username="admin", hashed_password=hashed_pass)
+                db.add(default_admin)
+                db.commit()
+                print("Default Operator 'admin' initialized.")
+            except Exception as e:
+                print(f"Admin creation skipped to prevent crash: {e}")
     finally:
         db.close()
 # --- AUTH LOGIC ---

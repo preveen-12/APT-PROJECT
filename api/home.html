@@ -5,23 +5,40 @@
     <title>Dashboard - APT Radar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        if (!localStorage.getItem('currentUser')) { window.location.href = '/login-page'; }
+        // Gatekeeper: Redirect to gateway if no user session exists
+        const user = localStorage.getItem('currentUser');
+        if (!user) { 
+            window.location.href = '/'; 
+        }
     </script>
 </head>
 <body class="bg-[#0f0f1a] text-slate-200 min-h-screen flex flex-col items-center justify-center p-6">
-    <div class="absolute top-6 right-6">
-        <button onclick="localStorage.clear(); window.location.href='/';" class="text-red-400 text-xs border border-red-900 p-2 rounded">LOGOUT</button>
+    
+    <div class="absolute top-6 left-6 right-6 flex justify-between items-center">
+        <div class="text-purple-400 text-xs tracking-widest uppercase">
+            Operator: <span id="display-user" class="text-slate-200"></span>
+        </div>
+        <button onclick="localStorage.clear(); window.location.href='/';" class="text-red-400 text-xs border border-red-900/50 p-2 rounded hover:bg-red-900/20 transition-all">
+            TERMINATE SESSION
+        </button>
     </div>
-    <h1 class="text-4xl font-bold text-purple-400 mb-10">COMMAND CENTER</h1>
+
+    <h1 class="text-4xl font-bold text-purple-400 mb-10 tracking-tighter">COMMAND CENTER</h1>
+    
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
-        <a href="/url-page" class="bg-[#16213e] p-10 rounded-2xl border border-purple-500/30 hover:border-purple-500 transition-all text-center">
-            <h2 class="text-xl font-bold mb-2">URL SCANNER</h2>
-            <p class="text-slate-400 text-sm">Analyze suspicious links</p>
+        <a href="/url-page" class="bg-[#16213e] p-10 rounded-2xl border border-purple-500/30 hover:border-purple-500 hover:shadow-[0_0_20px_rgba(139,92,246,0.2)] transition-all text-center group">
+            <h2 class="text-xl font-bold mb-2 group-hover:text-purple-400">URL SCANNER</h2>
+            <p class="text-slate-400 text-sm">Analyze suspicious links via VirusTotal</p>
         </a>
-        <a href="/file-page" class="bg-[#16213e] p-10 rounded-2xl border border-purple-500/30 hover:border-purple-500 transition-all text-center">
-            <h2 class="text-xl font-bold mb-2">FILE ANALYZER</h2>
-            <p class="text-slate-400 text-sm">Check file hashes for threats</p>
+        <a href="/file-page" class="bg-[#16213e] p-10 rounded-2xl border border-purple-500/30 hover:border-purple-500 hover:shadow-[0_0_20px_rgba(139,92,246,0.2)] transition-all text-center group">
+            <h2 class="text-xl font-bold mb-2 group-hover:text-purple-400">FILE ANALYZER</h2>
+            <p class="text-slate-400 text-sm">Check file hashes for known threats</p>
         </a>
     </div>
+
+    <script>
+        // Display the current operator name on the dashboard
+        document.getElementById('display-user').textContent = localStorage.getItem('currentUser') || 'Unknown';
+    </script>
 </body>
 </html>

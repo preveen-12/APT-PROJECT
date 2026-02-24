@@ -22,31 +22,33 @@
         const username = document.getElementById('user').value;
         const password = document.getElementById('pass').value;
 
+        // Validation check to prevent empty requests
+        if (!username || !password) {
+            alert("Credentials Required: Fields cannot be empty.");
+            return;
+        }
+
         try {
             const response = await fetch('/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
-                    username: username, 
-                    password: password 
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                // Save user to local storage for the Gatekeeper script
+                // Save session for the Dashboard Gatekeeper
                 localStorage.setItem('currentUser', data.username);
                 window.location.href = '/dashboard';
             } else {
                 alert("Access Denied: " + (data.detail || "Invalid credentials"));
             }
         } catch (err) {
-            alert("Login System Offline");
+            // High-priority alert if the backend is down
+            alert("Login System Offline: Check Render Dashboard Logs.");
         }
     }
-</script>
+    </script>
 </body>
 </html>
