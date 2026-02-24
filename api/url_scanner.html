@@ -9,12 +9,19 @@
         body { background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1a 100%); }
         .glow { box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
     </style>
+    <script>
+        // Gatekeeper: Redirect if not logged in
+        if (!localStorage.getItem('currentUser')) {
+            window.location.href = '/login-page';
+        }
+    </script>
 </head>
 <body class="text-slate-200 min-h-screen flex flex-col items-center justify-center p-6">
-    <div class="w-full max-w-xl mb-4 text-left">
-        <a href="/" class="text-purple-400 hover:text-lavender-300 text-sm font-medium transition-all flex items-center gap-2">
+    <div class="w-full max-w-xl mb-4 text-left flex justify-between items-center">
+        <a href="/dashboard" class="text-purple-400 hover:text-lavender-300 text-sm font-medium transition-all flex items-center gap-2">
             <span>←</span> Back to Command Center
         </a>
+        <span id="operatorDisplay" class="text-[10px] text-slate-500 uppercase tracking-widest"></span>
     </div>
 
     <div class="bg-[#16213e]/50 border border-purple-500/30 p-8 rounded-2xl glow w-full max-w-xl backdrop-blur-md text-center">
@@ -27,18 +34,24 @@
     </div>
 
     <div class="mt-10 w-full max-w-xl">
-        <h3 class="text-purple-400 text-sm font-bold mb-4 uppercase tracking-widest text-center">Recent URL Scans</h3>
+        <h3 class="text-purple-400 text-sm font-bold mb-4 uppercase tracking-widest text-center">Personal Scan History</h3>
         <div id="historyList" class="space-y-3">
             <p class="text-center text-slate-500 text-xs italic">No recent scans found.</p>
         </div>
     </div>
 
     <script>
+        // Show current operator name
+        document.getElementById('operatorDisplay').innerText = `Operator: ${localStorage.getItem('currentUser')}`;
+
         async function loadHistory() {
+            const user = localStorage.getItem('currentUser');
             try {
-                const res = await fetch('/history?scan_type=URL');
+                // Modified to include user parameter
+                const res = await fetch(`/history?scan_type=URL&user=${user}`);
                 const logs = await res.json();
                 const container = document.getElementById('historyList');
+                
                 if (logs.length > 0) {
                     container.innerHTML = logs.map(log => `
                         <div class="bg-[#16213e]/40 p-4 rounded-xl border-l-4 border-purple-600 backdrop-blur-sm">
@@ -55,15 +68,22 @@
 
         async function scanUrl() {
             const urlInput = document.getElementById('urlField').value;
+            const user = localStorage.getItem('currentUser');
+
             if (!urlInput) return alert("Enter a URL!");
+            
             try {
-                const response = await fetch(`/scan-url?url=${encodeURIComponent(urlInput)}`);
+                // Modified to include user parameter so backend can save the log to the right account
+                const response = await fetch(`/scan-url?url=${encodeURIComponent(urlInput)}&user=${user}`);
                 const data = await response.json();
+                
                 if (data.data) {
                     const stats = data.data.attributes.last_analysis_stats;
                     alert(`RADAR REPORT:\nMalicious: ${stats.malicious}\nHarmless: ${stats.harmless}`);
-                    loadHistory(); // Refresh history after scan
-                } else { alert(data.message); }
+                    loadHistory(); 
+                } else { 
+                    alert(data.message || "Scan initiated, refresh in a moment."); 
+                }
             } catch (err) { alert("Backend Offline!"); }
         }
 

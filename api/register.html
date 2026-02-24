@@ -18,42 +18,25 @@
     </div>
 
     <script>
-    async function doRegister() {
-        const username = document.getElementById('user').value;
-        const password = document.getElementById('pass').value;
+async function doRegister() {
+    const username = document.getElementById('user').value;
+    const password = document.getElementById('pass').value;
+    if (!username || !password) return alert("Fields required");
 
-        if (!username || !password) {
-            alert("Please fill in all fields!");
-            return;
-        }
+    const response = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    });
 
-        console.log("Attempting to register:", username);
-
-        try {
-            const response = await fetch('/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
-                    username: username, 
-                    password: password 
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                alert("Operator Registered! Redirecting to Login...");
-                window.location.href = '/login-page';
-            } else {
-                alert("Error: " + (data.detail || "Registration failed"));
-            }
-        } catch (err) {
-            console.error("Fetch error:", err);
-            alert("Connection to server lost. Please check if Render is still live.");
-        }
+    if (response.ok) {
+        alert("Registered!");
+        window.location.href = '/login-page';
+    } else {
+        const data = await response.json();
+        alert(data.detail || "Error");
     }
+}
 </script>
 </body>
 </html>
