@@ -18,24 +18,35 @@
     </div>
 
     <script>
-        async function doLogin() {
-            const username = document.getElementById('user').value;
-            const password = document.getElementById('pass').value;
+    async function doLogin() {
+        const username = document.getElementById('user').value;
+        const password = document.getElementById('pass').value;
 
+        try {
             const response = await fetch('/login', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ username, password })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    username: username, 
+                    password: password 
+                })
             });
 
             const data = await response.json();
+
             if (response.ok) {
+                // Save user to local storage for the Gatekeeper script
                 localStorage.setItem('currentUser', data.username);
                 window.location.href = '/dashboard';
             } else {
-                alert(data.detail || "Access Denied");
+                alert("Access Denied: " + (data.detail || "Invalid credentials"));
             }
+        } catch (err) {
+            alert("Login System Offline");
         }
-    </script>
+    }
+</script>
 </body>
 </html>

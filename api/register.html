@@ -18,24 +18,42 @@
     </div>
 
     <script>
-        async function doRegister() {
-            const username = document.getElementById('user').value;
-            const password = document.getElementById('pass').value;
+    async function doRegister() {
+        const username = document.getElementById('user').value;
+        const password = document.getElementById('pass').value;
 
+        if (!username || !password) {
+            alert("Please fill in all fields!");
+            return;
+        }
+
+        console.log("Attempting to register:", username);
+
+        try {
             const response = await fetch('/register', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ username, password })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    username: username, 
+                    password: password 
+                })
             });
 
             const data = await response.json();
+
             if (response.ok) {
-                alert("Operator Registered! Proceeding to Login.");
+                alert("Operator Registered! Redirecting to Login...");
                 window.location.href = '/login-page';
             } else {
-                alert(data.detail || "Registration Failed");
+                alert("Error: " + (data.detail || "Registration failed"));
             }
+        } catch (err) {
+            console.error("Fetch error:", err);
+            alert("Connection to server lost. Please check if Render is still live.");
         }
-    </script>
+    }
+</script>
 </body>
 </html>
