@@ -68,7 +68,22 @@ def get_db():
         yield db
     finally:
         db.close()
-
+# --- ADMIN INITIALIZATION ---
+@app.on_event("startup")
+async def startup_event():
+    db = SessionLocal()
+    try:
+        # Check if admin already exists
+        admin = db.query(User).filter(User.username == "admin").first()
+        if not admin:
+            # Create a default admin account
+            hashed_pass = pwd_context.hash("admin123")
+            default_admin = User(username="admin", hashed_password=hashed_pass)
+            db.add(default_admin)
+            db.commit()
+            print("Default Operator 'admin' initialized.")
+    finally:
+        db.close()
 # --- AUTH LOGIC ---
 @app.post("/register")
 async def register(auth: UserAuth, db: Session = Depends(get_db)):
